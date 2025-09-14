@@ -1,0 +1,25 @@
+######## ----------values for template files---------- ########
+# Grafana alert folder configuration
+alertFolderDevops: pagerduty-prod-devops
+alertFolderFrontend: pagerduty-prod-frontend
+alertFolderBackend: pagerduty-prod
+env: prod
+
+
+
+
+######## ----------values for alert yaml files---------- ########
+# Datasource configuration for production
+datasourceUid: bR-kexv4k
+# environment
+environment: production
+# ArgoCD project and namespace configuration
+project: production
+dest_namespace: prod
+
+
+
+enabled: true
+
+
+slack_channel: backend-alerts

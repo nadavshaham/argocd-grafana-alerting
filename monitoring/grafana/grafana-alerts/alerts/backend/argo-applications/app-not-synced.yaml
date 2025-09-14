@@ -1,0 +1,76 @@
+- uid: f38d0036-62b2-{{ .Values.environment }}
+  title: ArgoAppNotSynced-{{ .Values.environment }}
+  condition: B
+  data:
+    - refId: A
+      relativeTimeRange:
+        from: 60
+        to: 0
+      datasourceUid: Wilj3bv4z
+      model:
+        editorMode: code
+        expr: |-
+            group by(name, project, dest_namespace,sync_status)(
+              argocd_app_info{sync_status!="Synced", project="{{ .Values.project }}", dest_namespace=~"{{ .Values.dest_namespace }}|exodia",name!~"convoy--trustmi--.*|keycloak--trustmi--.*|customer-resources-.*|storybook--trustmi--*.+|self-signed-portal-*.+|portal-2--trustmi-*.+|internal-dashboard-*.+|ssp-template-editor--trustmi--*.+|cr-*.+--prod--prod-us|vendor-invitation--trustmi--*|perfectscale*.+"} != 0
+            )
+            * on (name, project) group_left(label_lastCommitSlackUserId,label_lastCommitUser) (
+              sum by (name, project,label_lastCommitSlackUserId,label_lastCommitUser) (
+                argocd_app_labels{project="{{ .Values.project }}"}
+              )
+            )
+        instant: false
+        intervalMs: 1000
+        legendFormat: __auto
+        maxDataPoints: 43200
+        range: true
+        refId: A
+    - refId: B
+      relativeTimeRange:
+        from: 60
+        to: 0
+      datasourceUid: __expr__
+      model:
+        conditions:
+            - evaluator:
+                params: []
+                type: gt
+              operator:
+                type: and
+              query:
+                params:
+                    - B
+              reducer:
+                params: []
+                type: last
+              type: query
+        datasource:
+            type: __expr__
+            uid: __expr__
+        expression: A
+        intervalMs: 1000
+        maxDataPoints: 43200
+        reducer: last
+        refId: B
+        type: reduce
+  noDataState: OK
+  execErrState: OK
+  for: 10m
+  annotations:
+    Last Commit User: '{{`{{ index $labels "label_lastCommitUser" }}`}}'
+    runbook_url: https://trustminetwork.atlassian.net/wiki/x/GoBePg
+    summary: |-
+        ArgoCD application {{`{{ $labels.name }}`}} is out of sync.
+
+        User last commit <@{{`{{ index $labels "label_lastCommitSlackUserId" }}`}}>
+
+        link: https://argocd.{{`{{ .Values.argoDomain }}`}}/applications/argocd/{{`{{ index $labels "name" }}`}}
+
+        project: {{`{{ index $labels "project" }}`}}
+  labels:
+    auto-resolve: "true"
+    environment:  {{ .Values.environment }}
+    notification: pagerduty
+    severity: low
+    team: backend
+    slack-channel: prod-env-changes
+  isPaused: false

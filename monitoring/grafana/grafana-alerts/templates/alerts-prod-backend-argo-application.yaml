@@ -1,0 +1,20 @@
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: grafana-alerts-backend-argo-application-{{ $.Values.env }}
+  labels:
+    grafana_alert: "1"
+data:
+{{- range $path, $file := .Files.Glob "alerts/backend/argo-applications/*.yaml" }}
+  {{ $filename := trimPrefix "alerts/backend/argo-applications/" $path }}
+    {{ printf "%s-%s" (trimSuffix ".yaml" $filename) $.Values.env }}.yaml: |
+      apiVersion: 1
+      groups:
+          - orgId: 1
+            name: argo-applications
+            folder: {{ $.Values.alertFolderBackend }}
+            interval: 1m
+            rules:
+{{ tpl ($file | toString) $ | indent 12 }}
+{{- end }}
+

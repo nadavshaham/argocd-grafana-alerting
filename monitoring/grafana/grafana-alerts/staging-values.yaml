@@ -1,0 +1,23 @@
+######## ----------values for template files---------- ########
+# Grafana alert folder configuration
+alertFolderDevops: pagerduty-staging-devops
+alertFolderFrontend: pagerduty-staging-frontend
+alertFolderBackend: pagerduty-staging
+env: stg
+
+
+######## ----------values for alert yaml files---------- ########
+# Datasource configuration for production
+datasourceUid: JSTgebvVk
+# environment
+environment: staging
+# ArgoCD project and namespace configuration
+project: preprod
+dest_namespace: preprod
+
+
+
+
+enabled: false
+
+slack_channel: backend-staging-alert
